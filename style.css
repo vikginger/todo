@@ -1,0 +1,63 @@
+@font-face {
+  font-weight: 100;
+  font-family: "Helvetica";
+  font-style: normal;
+  src: url("fonts/HelveticaNeueUltraLight.woff2") format("woff2"),
+  url("fonts/HelveticaNeueUltraLight.woff") format("woff");
+}
+
+@font-face {
+  font-weight: 300;
+  font-family: 'Helvetica';
+  font-style: normal;
+  src: url('fonts/HelveticaNeueLight.woff2') format('woff2'),
+  url('fonts/HelveticaNeueLight.woff') format('woff');
+}
+
+@font-face {
+  font-weight: 300;
+  font-family: "Helvetica";
+  font-style: italic;
+  src: url("fonts/HelveticaNeueLightItalic.woff2") format("woff2"),
+  url("fonts/HelveticaNeueLightItalic.woff") format("woff");
+}
+
+body {
+  min-width: 230px;
+  max-width: 550px;
+  margin: 0 auto;
+  font-family: "Helvetica", Arial, sans-serif;
+  font-weight: 300;
+  font-size: 14px;
+  line-height: 1.4em;
+  color: #4d4d4d;
+  background: #f5f5f5;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+}
+
+p {
+  margin: 0;
+}
+
+
+img {
+	max-width: 100%;
+	height: auto;
+}
+
+.visually-hidden {
+  position: absolute;
+  clip: rect(0 0 0 0);
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+}
