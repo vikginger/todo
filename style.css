@@ -100,10 +100,6 @@ main {
   outline: none;
 }
 
-input[type=checkbox] {
-  display: none;
-}
-
 .chekbox__toggle-all {
   position: relative;
 }
@@ -161,6 +157,7 @@ input[type=checkbox] {
   margin: auto 0;
   border: none;
   position: absolute;
+  z-index: 10;
   top: 0;
   bottom: 0;
   text-align: center;
@@ -277,22 +274,23 @@ input[type=checkbox] {
 	list-style: none;
 }
 
-.filters li a {
+.filters__item {
   position: relative;
   z-index: 10;
 	color: inherit;
-	margin: 3px;
+  margin: 3px;
 	padding: 3px 7px;
 	text-decoration: none;
 }
 
-.filters li a:hover {
+.filters__item:hover {
   border: 1px solid rgba(175, 47, 47, 0.1);
   border-radius: 3px;
 }
 
-.filters li a.selected {
-	border-color: rgba(175, 47, 47, 0.2);
+.filters__item.selected {
+  border: 1px solid rgba(175, 47, 47, 0.2);
+  border-radius: 3px;
 }
 
 .clear-completed {

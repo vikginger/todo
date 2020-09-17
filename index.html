@@ -9,43 +9,44 @@
   <body>
 
   <main>
+
     <h1 class="main-title">ToDo list</h1>
+
     <input class="new-task" id="new-task" type="text" placeholder="What needs to be done?" autofocus="">
+
     <div class="chekbox__toggle-all">
       <input class="toggle-all" id="toggle-all" type="checkbox">
       <label for="toggle-all"></label>
     </div>
-    <ul class="todo-list">
-      <li>
-        <input class="toggle-one" id="toggle-one" type="checkbox">
-        <label for="toggle-one"></label>
-        <label>123</label>
-        <button class="delete" type="button"></button>
-      </li>
-    </ul>
+
+    <ul class="todo-list" id="todo-list"></ul>
+
     <footer class="footer">
       <span class="todo-count">
-        <strong>1</strong>
+        <strong id="todo-count-left"></strong>
          item left
       </span>
       <ul class="filters">
         <li>
-          <a href="#">All</a>
+          <a href="#/" class="filters__item selected" id="filter-all">All</a>
         </li>
         <li>
-          <a href="#">Active</a>
+          <a href="#/active" class="filters__item" id="filter-active">Active</a>
         </li>
         <li>
-          <a href="#">Completed</a>
+          <a href="#/completed" class="filters__item" id="filter-completed">Completed</a>
         </li>
       </ul>
-      <button class="clear-completed" type="button" name="button">Clear completed</button>
+      <button class="clear-completed" type="button" name="button" id="clear-completed">Clear completed</button>
     </footer>
+
   </main>
 
   <footer class="info">
     <p>Double-click to edit a todo</p>
   </footer>
+
+  <script src="index.js"></script>
 
   </body>
 </html>
