@@ -101,6 +101,7 @@ main {
 }
 
 .chekbox__toggle-all {
+  display: none;
   position: relative;
 }
 
@@ -240,7 +241,7 @@ main {
 
 .footer {
   position: relative;
-  display: flex;
+  display: none;
   justify-content: space-between;
   color: #777;
 	padding: 10px 15px;
