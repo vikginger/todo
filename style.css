@@ -184,6 +184,10 @@ main {
   transition: color 0.4s;
 }
 
+.todo-list li.editMode .toggle-one + label {
+  display: none;
+}
+
 .todo-list li .toggle-one + label {
   background-image: url(data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2240%22%20height%3D%2240%22%20viewBox%3D%22-10%20-18%20100%20135%22%3E%3Ccircle%20cx%3D%2250%22%20cy%3D%2250%22%20r%3D%2250%22%20fill%3D%22none%22%20stroke%3D%22%23ededed%22%20stroke-width%3D%223%22/%3E%3C/svg%3E);
   background-repeat: no-repeat;
@@ -197,6 +201,26 @@ main {
 .todo-list li.completed label {
   color: #d9d9d9;
   text-decoration: line-through;
+}
+
+.todo-list li input[type=text] {
+  display: none;
+  width: 510px;
+  padding: 15px 15px 15px 20px;
+  margin-left: 40px;
+  line-height: 1.2;
+}
+
+.todo-list li input[type=text]:focus {
+  outline-color: rgba(32, 125, 212, 0.3);
+}
+
+.todo-list li.editMode input[type=text] {
+  display: block;
+}
+
+.todo-list li.editMode label.label-text {
+  display: none;
 }
 
 .todo-list li .delete {
@@ -231,7 +255,7 @@ main {
   outline: none;
 }
 
-.todo-list li .delete:after {
+.todo-list li .delete::after {
 	content: '×';
 }
 
@@ -239,10 +263,13 @@ main {
 	display: block;
 }
 
+.todo-list li.editMode:hover .delete {
+	display: none;
+}
+
 .footer {
   position: relative;
   display: none;
-  justify-content: space-between;
   color: #777;
 	padding: 10px 15px;
 	text-align: center;
@@ -264,6 +291,10 @@ main {
 	            0 17px 2px -6px rgba(0, 0, 0, 0.2);
 }
 
+.todo-count {
+  margin-right: 100px;
+}
+
 .todo-count strong {
 	font-weight: 300;
 }
@@ -271,6 +302,7 @@ main {
 .filters {
   display: flex;
 	margin: 0;
+  margin-right: 80px;
 	padding: 0;
 	list-style: none;
 }
@@ -295,11 +327,11 @@ main {
 }
 
 .clear-completed {
+  display: none;
   position: relative;
   z-index: 10;
   border: 0;
   background: none;
-  line-height: 20px;
 	text-decoration: none;
 	cursor: pointer;
   color: #777;

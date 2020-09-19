@@ -20,7 +20,10 @@ function createNewElement (task) {
   let labelToggleOne = document.createElement('label');
   labelToggleOne.setAttribute('for', 'toggle-one');
   let label = document.createElement('label');
+  label.className = 'label-text';
   label.innerText = task;
+  let input = document.createElement('input');
+  input.type = 'text';
   let buttonDelete = document.createElement('button');
   buttonDelete.type = 'button';
   buttonDelete.className = 'delete';
@@ -28,6 +31,7 @@ function createNewElement (task) {
   taskItem.appendChild(toggleOne);
   taskItem.appendChild(labelToggleOne);
   taskItem.appendChild(label);
+  taskItem.appendChild(input);
   taskItem.appendChild(buttonDelete);
 
   return taskItem;
@@ -79,14 +83,12 @@ clearCompleted.onclick = function deleteCompletedTasks() {
   };
 };
 
-
-function editTask() {
-
-};
-
 // завершение задачи через чекбокс
 function toggleTask() {
   let taskItem = this.parentNode;
+  let taskItems = this.parentNode.parentNode.querySelectorAll('li');
+  let countCompleted = 0;
+  let countNotCompleted = 0;
   let toggleOne = taskItem.querySelector('input.toggle-one');
   if (toggleOne.checked) {
     taskItem.classList.add('completed');
@@ -94,9 +96,21 @@ function toggleTask() {
     taskItem.classList.remove('completed');
   };
 
+  //добавление Clear Completed
+  for(let i = 0; i < taskItems.length; i++) {
+    if (!taskItems[i].classList.contains('completed')) {
+      countNotCompleted ++;
+    };
+  };
+  console.log(countNotCompleted);
+  console.log(taskItems.length);
+  if (countNotCompleted === taskItems.length) {
+    clearCompleted.style.display = "none";
+  } else {
+    clearCompleted.style.display = "block";
+  };
+
   //общий чек-лист загорается, если отмечены все задачи
-  let taskItems = this.parentNode.parentNode.querySelectorAll('li');
-  let countCompleted = 0;
   for(let i = 0; i < taskItems.length; i++) {
     if (taskItems[i].classList.contains('completed')) {
       countCompleted ++;
@@ -117,9 +131,11 @@ toggleAll.onclick = function toggleAllTasks () {
     if (toggleAll.checked) {
       taskItem.classList.add('completed');
       toggleOne.checked = true;
+      clearCompleted.style.display = "block";
     } else {
       taskItem.classList.remove('completed');
       toggleOne.checked = false;
+      clearCompleted.style.display = "none";
     };
   };
 };
@@ -127,9 +143,31 @@ toggleAll.onclick = function toggleAllTasks () {
 function bindTaskEvents(taskItem) {
   let checkbox = taskItem.querySelector('input.toggle-one');
   let deleteButton = taskItem.querySelector('button.delete');
+  let editLabel = taskItem.querySelector('label.label-text');
 
   checkbox.onclick = toggleTask;
   deleteButton.onclick = deleteTask;
+
+  // редактирование задачи
+  editLabel.addEventListener('dblclick', function func() {
+
+    let taskItem = this.parentNode;
+
+    let input = taskItem.querySelector('input[type=text]');
+    let toggleOne = taskItem.querySelector('input.toggle-one');
+    let deleteButton = taskItem.querySelector('button.delete');
+
+    taskItem.classList.add('editMode');
+    input.value = editLabel.innerText;
+
+    input.addEventListener('blur', function() {
+		  editLabel.innerText = this.value;
+      taskItem.classList.remove('editMode');
+      editLabel.addEventListener('dblclick', func);
+	  });
+
+	  editLabel.removeEventListener('dblclick', func);
+  });
 };
 
 
