@@ -4,7 +4,6 @@ let toggleAll = document.getElementById('toggle-all');
 let taskList = document.getElementById('todo-list');
 let blockFooter = document.querySelector('footer.footer');
 let countLeft = document.getElementById('todo-count-left');
-countLeft = 0;
 let filterAll = document.getElementById('filter-all');
 let filterActive = document.getElementById('filter-active');
 let filterCompleted = document.getElementById('filter-completed');
@@ -53,6 +52,19 @@ inputTask.addEventListener('keyup', function (e) {
   if (e.keyCode === 13) {
     event.preventDefault();
     addTask();
+    // счётчик
+    let taskItems = taskList.querySelectorAll('li');
+    let count = 0;
+    for(let i = 0; i < taskItems.length; i++) {
+      if (!taskItems[i].classList.contains('completed')) {
+        count++;
+      };
+    };
+    countLeft.innerHTML = count;
+
+    if (taskItems.length === 1) {
+      toggleAll.checked = false;
+    };
   };
 });
 
@@ -121,6 +133,15 @@ function toggleTask() {
   } else {
     toggleAll.checked = false;
   };
+
+  // счётчик
+  let count = 0;
+  for(let i = 0; i < taskItems.length; i++) {
+    if (!taskItems[i].classList.contains('completed')) {
+      count++;
+    };
+  };
+  countLeft.innerHTML = count;
 };
 
 // завершение всех задач через чекбокс
@@ -138,6 +159,15 @@ toggleAll.onclick = function toggleAllTasks () {
       clearCompleted.style.display = "none";
     };
   };
+
+  // счётчик
+  let count = 0;
+  for(let i = 0; i < taskItems.length; i++) {
+    if (!taskItems[i].classList.contains('completed')) {
+      count++;
+    };
+  };
+  countLeft.innerHTML = count;
 };
 
 function bindTaskEvents(taskItem) {
