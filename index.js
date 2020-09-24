@@ -1,25 +1,26 @@
-let inputTask = document.getElementById('new-task');
-let blockToggleAll = document.querySelector('div.chekbox__toggle-all');
-let toggleAll = document.getElementById('toggle-all');
-let taskList = document.getElementById('todo-list');
-let blockFooter = document.querySelector('footer.footer');
-let countLeft = document.getElementById('todo-count-left');
-let filterAll = document.getElementById('filter-all');
-let filterActive = document.getElementById('filter-active');
-let filterCompleted = document.getElementById('filter-completed');
-let clearCompleted = document.getElementById('clear-completed');
+const inputTask = document.getElementById('new-task');
+const blockToggleAll = document.querySelector('div.chekbox__toggle-all');
+const toggleAll = document.getElementById('toggle-all');
+const taskList = document.getElementById('todo-list');
+const blockFooter = document.querySelector('footer.footer');
+const countLeft = document.getElementById('todo-count-left');
+const filterAll = document.getElementById('filter-all');
+const filterActive = document.getElementById('filter-active');
+const filterCompleted = document.getElementById('filter-completed');
+const clearCompleted = document.getElementById('clear-completed');
+const keyEnter = 13;
 
 let newId = 0;
 
 // счётчик
 function countLeftNumber() {
   let count = 0;
-  let taskItemsList = taskList.querySelectorAll('li');
-  for(let i = 0; i < taskItemsList.length; i++) {
-    if (!taskItemsList[i].classList.contains('completed')) {
+  const taskItemsList = taskList.querySelectorAll('li');
+  taskItemsList.forEach(item => {
+    if (!item.classList.contains('completed')) {
       count++;
     };
-  };
+  });
   countLeft.innerHTML = count;
 };
 
@@ -44,17 +45,17 @@ function getValueAfterReload() {
       bindTaskEvents(taskItem);
 		};
 
-    let taskItems = taskList.querySelectorAll('li');
+    const taskItems = taskList.querySelectorAll('li');
     let countNotCompleted = 0;
     let countCompleted = 0;
-    for(let i = 0; i < taskItems.length; i++) {
-      if (!taskItems[i].classList.contains('completed')) {
+    taskItems.forEach(item => {
+      if (!item.classList.contains('completed')) {
         countNotCompleted ++;
       };
-      if (taskItems[i].classList.contains('completed')) {
+      if (item.classList.contains('completed')) {
         countCompleted ++;
       };
-    };
+    });
     if (countNotCompleted === taskItems.length) {
       clearCompleted.style.display = "none";
     } else {
@@ -76,19 +77,19 @@ getValueAfterReload();
 
 // Создание элемента списка
 function createNewElement (task, id) {
-  let taskItem = document.createElement('li');
+  const taskItem = document.createElement('li');
   taskItem.setAttribute('data-item', id);
-  let toggleOne = document.createElement('input');
+  const toggleOne = document.createElement('input');
   toggleOne.type = 'checkbox';
   toggleOne.className = 'toggle-one';
-  let labelToggleOne = document.createElement('label');
+  const labelToggleOne = document.createElement('label');
   labelToggleOne.setAttribute('for', 'toggle-one');
-  let label = document.createElement('label');
+  const label = document.createElement('label');
   label.className = 'label-text';
   label.innerText = task;
-  let input = document.createElement('input');
+  const input = document.createElement('input');
   input.type = 'text';
-  let buttonDelete = document.createElement('button');
+  const buttonDelete = document.createElement('button');
   buttonDelete.type = 'button';
   buttonDelete.className = 'delete';
 
@@ -103,11 +104,13 @@ function createNewElement (task, id) {
 
 // Добавление новой задачи в список
 function addTask() {
-  if (inputTask.value) {
-    let taskItem = createNewElement(inputTask.value, newId);
+  if (!inputTask.value) {
+    return null;
+  } else {
+    const taskItem = createNewElement(inputTask.value, newId);
     taskList.appendChild(taskItem);
     bindTaskEvents(taskItem);
-    let taskLocalStorage = [inputTask.value];
+    const taskLocalStorage = [inputTask.value];
     localStorage.setItem('taskId_' + newId, JSON.stringify(taskLocalStorage));
     inputTask.value="";
     blockToggleAll.style.display = "block";
@@ -116,15 +119,15 @@ function addTask() {
 };
 
 inputTask.addEventListener('keyup', function (e) {
-  if (e.keyCode === 13) {
+  if (e.keyCode === keyEnter) {
     event.preventDefault();
-    let taskItems = taskList.querySelectorAll('li');
-    for(let i = 0; i < taskItems.length; i++) {
-      let maxId = taskItems[i].getAttribute('data-item');
+    const taskItems = taskList.querySelectorAll('li');
+    taskItems.forEach(item => {
+      let maxId = item.getAttribute('data-item');
       if (maxId > newId) {
         newId = maxId;
       };
-    };
+    });
     newId++;
     addTask();
     // счётчик
@@ -138,8 +141,8 @@ inputTask.addEventListener('keyup', function (e) {
 
 // удаление задачи
 function deleteTask() {
-  let taskItem = this.parentNode;
-  let taskList = taskItem.parentNode;
+  const taskItem = this.parentNode;
+  const taskList = taskItem.parentNode;
   localStorage.removeItem("taskId_" + taskItem.getAttribute('data-item'));
   taskList.removeChild(taskItem);
 
@@ -150,13 +153,13 @@ function deleteTask() {
   countLeftNumber();
 
   // убираем ClearCompleted, если нет завершенных задач
-  let taskItems = taskList.querySelectorAll('li');
+  const taskItems = taskList.querySelectorAll('li');
   let countNotCompleted = 0;
-  for(let i = 0; i < taskItems.length; i++) {
-    if (!taskItems[i].classList.contains('completed')) {
+  taskItems.forEach(item => {
+    if (!item.classList.contains('completed')) {
       countNotCompleted ++;
     };
-  };
+  });
   if (countNotCompleted === taskItems.length) {
     clearCompleted.style.display = "none";
   } else {
@@ -166,13 +169,13 @@ function deleteTask() {
 
 // удаление всех завершенных задач
 clearCompleted.onclick = function deleteCompletedTasks() {
-  let taskItems = taskList.querySelectorAll('li');
-  for(let i = 0; i < taskItems.length; i++) {
-    if (taskItems[i].classList.contains('completed')) {
-      localStorage.removeItem("taskId_" + taskItems[i].getAttribute('data-item'));
-      taskItems[i].parentNode.removeChild(taskItems[i]);
+  const taskItems = taskList.querySelectorAll('li');
+  taskItems.forEach(item => {
+    if (item.classList.contains('completed')) {
+      localStorage.removeItem("taskId_" + item.getAttribute('data-item'));
+      item.parentNode.removeChild(item);
     };
-  };
+  });
 
   if (!taskList.hasChildNodes()) {
     blockToggleAll.style.display = "none";
@@ -184,14 +187,14 @@ clearCompleted.onclick = function deleteCompletedTasks() {
 
 // завершение задачи через чекбокс
 function toggleTask() {
-  let taskItem = this.parentNode;
-  let taskItems = this.parentNode.parentNode.querySelectorAll('li');
+  const taskItem = this.parentNode;
+  const taskItems = this.parentNode.parentNode.querySelectorAll('li');
   let countCompleted = 0;
   let countNotCompleted = 0;
-  let toggleOne = taskItem.querySelector('input.toggle-one');
-  let label = taskItem.querySelector('label.label-text');
+  const toggleOne = taskItem.querySelector('input.toggle-one');
+  const label = taskItem.querySelector('label.label-text');
   let classItem;
-  let taskLocalStorage = [label.innerHTML];
+  const taskLocalStorage = [label.innerHTML];
   if (toggleOne.checked) {
     taskItem.classList.add('completed');
     classItem = 'completed';
@@ -205,11 +208,14 @@ function toggleTask() {
   localStorage["taskId_" + taskItem.getAttribute('data-item')] = JSON.stringify(taskLocalStorage);
 
   //добавление Clear Completed
-  for(let i = 0; i < taskItems.length; i++) {
-    if (!taskItems[i].classList.contains('completed')) {
+  taskItems.forEach(item => {
+    if (!item.classList.contains('completed')) {
       countNotCompleted ++;
     };
-  };
+    if (item.classList.contains('completed')) {
+      countCompleted ++;
+    };
+  });
   if (countNotCompleted === taskItems.length) {
     clearCompleted.style.display = "none";
   } else {
@@ -217,11 +223,6 @@ function toggleTask() {
   };
 
   //общий чек-лист загорается, если отмечены все задачи
-  for(let i = 0; i < taskItems.length; i++) {
-    if (taskItems[i].classList.contains('completed')) {
-      countCompleted ++;
-    };
-  };
   if (countCompleted === taskItems.length) {
     toggleAll.checked = true;
   } else {
@@ -233,12 +234,12 @@ function toggleTask() {
 
 // завершение всех задач через чекбокс
 toggleAll.onclick = function toggleAllTasks () {
-  let taskItems = taskList.querySelectorAll('li');
+  const taskItems = taskList.querySelectorAll('li');
   let classItem;
   for(let taskItem of taskItems) {
-    let toggleOne = taskItem.querySelector('input.toggle-one');
-    let label = taskItem.querySelector('label.label-text');
-    let taskLocalStorage = [label.innerHTML];
+    const toggleOne = taskItem.querySelector('input.toggle-one');
+    const label = taskItem.querySelector('label.label-text');
+    const taskLocalStorage = [label.innerHTML];
     if (toggleAll.checked) {
       taskItem.classList.add('completed');
       toggleOne.checked = true;
@@ -258,9 +259,9 @@ toggleAll.onclick = function toggleAllTasks () {
 };
 
 function bindTaskEvents(taskItem) {
-  let checkbox = taskItem.querySelector('input.toggle-one');
-  let deleteButton = taskItem.querySelector('button.delete');
-  let editLabel = taskItem.querySelector('label.label-text');
+  const checkbox = taskItem.querySelector('input.toggle-one');
+  const deleteButton = taskItem.querySelector('button.delete');
+  const editLabel = taskItem.querySelector('label.label-text');
 
   checkbox.onclick = toggleTask;
   deleteButton.onclick = deleteTask;
@@ -268,26 +269,67 @@ function bindTaskEvents(taskItem) {
   // редактирование задачи
   editLabel.addEventListener('dblclick', function func() {
 
-    let taskItem = this.parentNode;
+    const taskItem = this.parentNode;
 
-    let input = taskItem.querySelector('input[type=text]');
-    let toggleOne = taskItem.querySelector('input.toggle-one');
-    let deleteButton = taskItem.querySelector('button.delete');
-    let taskLocalStorage = [];
+    const input = taskItem.querySelector('input[type=text]');
+    const toggleOne = taskItem.querySelector('input.toggle-one');
+    const deleteButton = taskItem.querySelector('button.delete');
+    const taskLocalStorage = [];
     let taskClass;
     taskItem.classList.add('editMode');
     input.value = editLabel.innerText;
 
-    input.addEventListener('blur', function() {
-		  editLabel.innerText = this.value;
+    function editComplete(obj) {
+      editLabel.innerText = obj.value;
       taskItem.classList.remove('editMode');
-      taskLocalStorage[0] = this.value;
+      taskLocalStorage[0] = obj.value;
       if (taskItem.classList.contains('completed')) {
         taskClass = 'completed';
-      }
+      };
       taskLocalStorage[1] = taskClass;
       localStorage["taskId_" + taskItem.getAttribute('data-item')] = JSON.stringify(taskLocalStorage);
       editLabel.addEventListener('dblclick', func);
+    };
+
+    function editDelete() {
+      const taskList = taskItem.parentNode;
+      localStorage.removeItem("taskId_" + taskItem.getAttribute('data-item'));
+      taskList.removeChild(taskItem);
+
+      if (!taskList.hasChildNodes()) {
+        blockToggleAll.style.display = "none";
+        blockFooter.style.display = "none";
+      };
+      countLeftNumber();
+      const taskItems = taskList.querySelectorAll('li');
+      let countNotCompleted = 0;
+      taskItems.forEach(item => {
+        if (!item.classList.contains('completed')) {
+          countNotCompleted ++;
+        };
+      });
+      if (countNotCompleted === taskItems.length) {
+        clearCompleted.style.display = "none";
+      } else {
+        clearCompleted.style.display = "block";
+      };
+    };
+
+    input.addEventListener('blur', function() {
+      editComplete(input);
+      if (!input.value) {
+        editDelete();
+      };
+	  });
+
+    input.addEventListener('keyup', function (e) {
+      if (e.keyCode === keyEnter) {
+        event.preventDefault();
+        editComplete(input);
+        if (!input.value) {
+          editDelete();
+        };
+      };
 	  });
 
 	  editLabel.removeEventListener('dblclick', func);
@@ -299,10 +341,10 @@ function bindTaskEvents(taskItem) {
 
 //All
 filterAll.onclick = function filterAllTasks () {
-  let taskItems = taskList.querySelectorAll('li');
-  for(let i = 0; i < taskItems.length; i++) {
-    taskItems[i].style.display = "block";
-  };
+  const taskItems = taskList.querySelectorAll('li');
+  taskItems.forEach(item => {
+    item.style.display = "block";
+  });
   filterActive.classList.remove('selected');
   filterAll.classList.add('selected');
   filterCompleted.classList.remove('selected');
@@ -310,13 +352,13 @@ filterAll.onclick = function filterAllTasks () {
 
 //Active
 filterActive.onclick = function filterActiveTasks () {
-  let taskItems = taskList.querySelectorAll('li');
-  for(let i = 0; i < taskItems.length; i++) {
-    taskItems[i].style.display = "block";
-    if (taskItems[i].classList.contains('completed')) {
-      taskItems[i].style.display = "none";
+  const taskItems = taskList.querySelectorAll('li');
+  taskItems.forEach(item => {
+    item.style.display = "block";
+    if (item.classList.contains('completed')) {
+      item.style.display = "none";
     };
-  };
+  });
   filterActive.classList.add('selected');
   filterAll.classList.remove('selected');
   filterCompleted.classList.remove('selected');
@@ -324,13 +366,13 @@ filterActive.onclick = function filterActiveTasks () {
 
 //Completed
 filterCompleted.onclick = function filterCompletedTasks () {
-  let taskItems = taskList.querySelectorAll('li');
-  for(let i = 0; i < taskItems.length; i++) {
-    taskItems[i].style.display = "block";
-    if (!taskItems[i].classList.contains('completed')) {
-      taskItems[i].style.display = "none";
+  const taskItems = taskList.querySelectorAll('li');
+  taskItems.forEach(item => {
+    item.style.display = "block";
+    if (!item.classList.contains('completed')) {
+      item.style.display = "none";
     };
-  };
+  });
   filterActive.classList.remove('selected');
   filterAll.classList.remove('selected');
   filterCompleted.classList.add('selected');

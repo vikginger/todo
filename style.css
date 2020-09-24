@@ -231,13 +231,11 @@ main {
   padding: 0;
   border: 0;
   position: absolute;
-  top: 0;
+  top: 17%;
   right: 10px;
-  bottom: 0;
   margin: auto 0;
   font-size: 30px;
   color: #cc9a9a;
-  margin-bottom: 11px;
   transition: color 0.2s ease-out;
   background: none;
   font-size: 100%;
