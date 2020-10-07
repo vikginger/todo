@@ -334,7 +334,7 @@ function bindTaskEvents(taskItem) {
 
 	  editLabel.removeEventListener('dblclick', func);
   });
-};
+}; 
 
 
 // фильтрация задач
