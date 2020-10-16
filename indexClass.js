@@ -10,386 +10,332 @@ const filterCompleted = document.getElementById('filter-completed');
 const clearCompleted = document.getElementById('clear-completed');
 const keyEnter = 13;
 
-let newId = 0;
-let deleteButtons;
+// Этот класс не должен содержать логики, только методы управления
+// Его контроллером выступает класс Todolist, он отвечает за всю логику, переключения и тд
+class Task {
+  constructor(id, title) {
+    this.id = id;
+    this.title = title;
+    this.isHide = false;
+    this.isComplete = false;
+    this.onTaskDelete = () => {};
+    this.onToggleClick = () => {};
+    this.onTaskEdit = () => {};
+    this.onTaskEditComplete = () => {};
 
-function countLeftNumber() {
-  let count = 0;
-  const taskItemsList = taskList.querySelectorAll('li');
-  taskItemsList.forEach(item => {
-    if (!item.classList.contains('completed')) {
-      count++;
-    };
-  });
-  countLeft.innerHTML = count;
-};
-
-class TodoList {
-
-  constructor(task) {
-    this.task = task;
+    this.init = this.init.bind(this);
+    this.delete = this.delete.bind(this);
+    this.edit = this.edit.bind(this);
+    this.editComplete = this.editComplete.bind(this);
+    this.record = this.record.bind(this);
+    this.reRecord = this.reRecord.bind(this);
+    this.removeRecord = this.removeRecord.bind(this);
+    this.completed = this.completed.bind(this);
+    this.uncompleted = this.uncompleted.bind(this);
+    this.init();
   }
 
-  toggleTask(task) {
-    const checkbox = task.querySelector('input.toggle-one');
-    checkbox.onclick = function () {
-      const taskItem = this.parentNode;
-      const taskItems = this.parentNode.parentNode.querySelectorAll('li');
-      let countCompleted = 0;
-      let countNotCompleted = 0;
-      const toggleOne = taskItem.querySelector('input.toggle-one');
-      const label = taskItem.querySelector('label.label-text');
-      let classItem;
-      const taskLocalStorage = [label.innerHTML];
-      if (toggleOne.checked) {
-        taskItem.classList.add('completed');
-        classItem = 'completed';
-        taskLocalStorage[1] = classItem;
-      } else {
-        taskItem.classList.remove('completed');
-        taskLocalStorage[1] = classItem;
-      };
-      // перезаписываем значение в LocalStorage вместе с классом
-      localStorage["taskId_" + taskItem.getAttribute('data-item')] = JSON.stringify(taskLocalStorage);
+  init() {
+    this.root = document.createElement("li");
+    this.input = document.createElement("input");
+    this.label = document.createElement("label");
+    this.toggleOne = document.createElement("input");
+    this.buttonDelete = document.createElement("button");
+    this.labelToggleOne = document.createElement("label");
 
-      //добавление Clear Completed
-      taskItems.forEach(item => {
-        if (!item.classList.contains('completed')) {
-          countNotCompleted ++;
-        };
-        if (item.classList.contains('completed')) {
-          countCompleted ++;
-        };
-      });
-      if (countNotCompleted === taskItems.length) {
-        clearCompleted.style.display = "none";
-      } else {
-        clearCompleted.style.display = "block";
-      };
+    this.label.innerText = this.title;
+    this.input.type = "text";
+    this.toggleOne.type = "checkbox";
+    this.buttonDelete.type = "button";
+    this.label.className = "label-text";
+    this.buttonDelete.className = "delete";
+    this.toggleOne.className = "toggle-one";
 
-      //общий чек-лист загорается, если отмечены все задачи
-      if (countCompleted === taskItems.length) {
-        toggleAll.checked = true;
-      } else {
-        toggleAll.checked = false;
-      };
-      countLeftNumber();
+    this.root.appendChild(this.toggleOne);
+    this.root.appendChild(this.labelToggleOne);
+    this.root.appendChild(this.label);
+    this.root.appendChild(this.input);
+    this.root.appendChild(this.buttonDelete);
+    taskList.appendChild(this.root);
+
+    this.toggleOne.addEventListener("click", () => this.onToggleClick(this));
+    this.buttonDelete.addEventListener("click", () => this.onTaskDelete(this));
+    this.label.addEventListener("dblclick", () => this.onTaskEdit(this));
+    this.input.addEventListener("blur", () => this.onTaskEditComplete(this));
+  }
+
+  completed() {
+    this.isComplete = true;
+    this.root.classList.add("completed");
+    this.toggleOne.checked = true;
+  }
+
+  uncompleted() {
+    this.isComplete = false;
+    this.root.classList.remove("completed");
+    this.toggleOne.checked = false;
+  }
+
+  show() {
+    this.isHide = false;
+    this.root.style.display = "block";
+  }
+
+  hide() {
+    this.isHide = true;
+    this.root.style.display = "none";
+  }
+
+  delete() {
+    this.root.remove();
+  }
+
+  edit() {
+    this.root.classList.add("editMode");
+    this.input.value = this.label.innerText;
+  }
+
+  editComplete() {
+    this.root.classList.remove("editMode");
+    this.label.innerText = this.input.value;
+    this.title = this.input.value;
+  }
+
+  record() {
+    localStorage.setItem(this.id, JSON.stringify(this));
+  }
+
+  reRecord() {
+    localStorage[this.id] = JSON.stringify(this);
+  }
+
+  removeRecord() {
+    localStorage.removeItem(this.id);
+  }
+}
+
+class Todolist {
+  constructor() {
+    this.list = {};
+    this.addTask = this.addTask.bind(this);
+    this.recordTask = this.recordTask.bind(this);
+    this.getList = this.getList.bind(this);
+    this.toggleTask = this.toggleTask.bind(this);
+    this.toggleAllTasks = this.toggleAllTasks.bind(this);
+    this.deleteTask = this.deleteTask.bind(this);
+    this.deleteCompletedTasks = this.deleteCompletedTasks.bind(this);
+    this.editTask = this.editTask.bind(this);
+    this.editCompleteTask = this.editCompleteTask.bind(this);
+    this.showAllTasks = this.showAllTasks.bind(this);
+    this.showAllCompletedTasks = this.showAllCompletedTasks.bind(this);
+    this.showAllActiveTasks = this.showAllActiveTasks.bind(this);
+    this.showFooter = this.showFooter.bind(this);
+    this.showClearCompleted = this.showClearCompleted.bind(this);
+    this.countLeftNumber = this.countLeftNumber.bind(this);
+    this.control = this.control.bind(this);
+    this.getValueAfterReload = this.getValueAfterReload.bind(this);
+
+    this.control();
+    this.getValueAfterReload();
+  }
+
+  control() {
+    toggleAll.addEventListener("click", () => this.toggleAllTasks());
+    clearCompleted.addEventListener("click", () => this.deleteCompletedTasks());
+    filterActive.addEventListener("click", () => this.showAllActiveTasks());
+    filterAll.addEventListener("click", () => this.showAllTasks());
+    filterCompleted.addEventListener("click", () => this.showAllCompletedTasks());
+  }
+
+  getList() {
+    return Object.values(this.list);
+  }
+
+  showFooter() {
+    if (Object.keys(this.list).length === 0) {
+      blockToggleAll.style.display = "none";
+      blockFooter.style.display = "none";
+    } else {
+      blockToggleAll.style.display = "block";
+      blockFooter.style.display = "flex";
     }
   }
 
-  deleteTask(task) {
-    const deleteButton = task.querySelector('button.delete');
-    deleteButton.onclick = function () {
-      const taskItem = this.parentNode;
-      const taskList = taskItem.parentNode;
-      localStorage.removeItem("taskId_" + taskItem.getAttribute('data-item'));
-      taskList.removeChild(taskItem);
-
-      if (!taskList.hasChildNodes()) {
-        blockToggleAll.style.display = "none";
-        blockFooter.style.display = "none";
-      };
-      countLeftNumber();
-
-      // убираем ClearCompleted, если нет завершенных задач
-      const taskItems = taskList.querySelectorAll('li');
-      let countNotCompleted = 0;
-      taskItems.forEach(item => {
-        if (!item.classList.contains('completed')) {
-          countNotCompleted ++;
-        };
-      });
-      if (countNotCompleted === taskItems.length) {
-        clearCompleted.style.display = "none";
-      } else {
-        clearCompleted.style.display = "block";
-      };
-    };
+  addTask(task) {
+    this.list[task.id] = task;
+    task.onTaskDelete = this.deleteTask;
+    task.onToggleClick = this.toggleTask;
+    task.onTaskEdit = this.editTask;
+    task.onTaskEditComplete = this.editCompleteTask;
+    this.showFooter();
+    this.countLeftNumber();
   }
 
-  editTask(task) {
-    const editLabel = task.querySelector('label.label-text');
-    editLabel.addEventListener('dblclick', function func() {
-
-      const taskItem = this.parentNode;
-      const input = taskItem.querySelector('input[type=text]');
-      const toggleOne = taskItem.querySelector('input.toggle-one');
-      const deleteButton = taskItem.querySelector('button.delete');
-      const taskLocalStorage = [];
-      let taskClass;
-      taskItem.classList.add('editMode');
-      input.value = editLabel.innerText;
-
-      function editComplete(obj) {
-        editLabel.innerText = obj.value;
-        taskItem.classList.remove('editMode');
-        taskLocalStorage[0] = obj.value;
-        if (taskItem.classList.contains('completed')) {
-          taskClass = 'completed';
-        };
-        taskLocalStorage[1] = taskClass;
-        localStorage["taskId_" + taskItem.getAttribute('data-item')] = JSON.stringify(taskLocalStorage);
-        editLabel.addEventListener('dblclick', func);
-      };
-
-      function editDelete() {
-        const taskList = taskItem.parentNode;
-        localStorage.removeItem("taskId_" + taskItem.getAttribute('data-item'));
-        taskList.removeChild(taskItem);
-
-        if (!taskList.hasChildNodes()) {
-          blockToggleAll.style.display = "none";
-          blockFooter.style.display = "none";
-        };
-        countLeftNumber();
-        const taskItems = taskList.querySelectorAll('li');
-        let countNotCompleted = 0;
-        taskItems.forEach(item => {
-          if (!item.classList.contains('completed')) {
-            countNotCompleted ++;
-          };
-        });
-        if (countNotCompleted === taskItems.length) {
-          clearCompleted.style.display = "none";
-        } else {
-          clearCompleted.style.display = "block";
-        };
-      };
-
-      input.addEventListener('blur', function() {
-        editComplete(input);
-        if (!input.value) {
-          editDelete();
-        };
-  	  });
-
-      input.addEventListener('keyup', function (e) {
-        if (e.keyCode === keyEnter) {
-          event.preventDefault();
-          editComplete(input);
-          if (!input.value) {
-            editDelete();
-          };
-        };
-  	  });
-
-  	  editLabel.removeEventListener('dblclick', func);
-    });
-
+  recordTask(task) {
+    task.record();
   }
 
-  getValueAfterReload() {
-    if (localStorage.length > 0) {
-  		for (let i = 0; i < localStorage.length; i++) {
-  		  let key = localStorage.key(i);
-        let idTask = key.replace(/taskId_/gi, '');
-        let taskObject = JSON.parse(localStorage.getItem(key));
-        let valueTask = taskObject[0];
-        let classTask = taskObject[1];
-        let newTask = new Task(valueTask, idTask);
-        let taskItem = newTask.createNewElement(valueTask, idTask);
-        taskItem.classList.add(classTask);
-        let toggleOne = taskItem.querySelector('input.toggle-one');
-        if (classTask === 'completed') {
-          toggleOne.checked = true;
-        } else {
-          toggleOne.checked = false;
-        };
-        taskList.appendChild(taskItem);
-        this.toggleTask(taskItem);
-        this.deleteTask(taskItem);
-        this.editTask(taskItem);
-  		};
-
-      const taskItems = taskList.querySelectorAll('li');
-      let countNotCompleted = 0;
-      let countCompleted = 0;
-      taskItems.forEach(item => {
-        if (!item.classList.contains('completed')) {
-          countNotCompleted ++;
-        };
-        if (item.classList.contains('completed')) {
-          countCompleted ++;
-        };
-      });
-      if (countNotCompleted === taskItems.length) {
-        clearCompleted.style.display = "none";
-      } else {
-        clearCompleted.style.display = "block";
-      };
-      if (countCompleted === taskItems.length) {
-        toggleAll.checked = true;
-      } else {
-        toggleAll.checked = false;
-      };
-      blockToggleAll.style.display = "block";
-      blockFooter.style.display = "flex";
-
-      countLeftNumber();
-  	};
-  }
-
-  addTask() {
-    if (!inputTask.value) {
-      return null;
+  toggleTask(task) {
+    if (task.isComplete) {
+      task.uncompleted();
     } else {
-      let newTask = new Task(inputTask.value, newId);
-      let taskItem = newTask.createNewElement(inputTask.value, newId);
-      taskList.appendChild(taskItem);
-      this.toggleTask(taskItem);
-      this.deleteTask(taskItem);
-      this.editTask(taskItem);
-      const taskLocalStorage = [inputTask.value];
-      localStorage.setItem('taskId_' + newId, JSON.stringify(taskLocalStorage));
-      inputTask.value="";
-      blockToggleAll.style.display = "block";
-      blockFooter.style.display = "flex";
-    };
+      task.completed();
+    }
+    task.reRecord();
+    this.countLeftNumber();
+    this.showClearCompleted();
   }
 
   toggleAllTasks() {
-    const taskItems = taskList.querySelectorAll('li');
-    let classItem;
-    for(let taskItem of taskItems) {
-      const toggleOne = taskItem.querySelector('input.toggle-one');
-      const label = taskItem.querySelector('label.label-text');
-      const taskLocalStorage = [label.innerHTML];
+    this.getList().forEach((task) => {
       if (toggleAll.checked) {
-        taskItem.classList.add('completed');
-        toggleOne.checked = true;
-        classItem = 'completed';
-        taskLocalStorage[1] = classItem;
-        clearCompleted.style.display = "block";
+        task.completed();
       } else {
-        taskItem.classList.remove('completed');
-        toggleOne.checked = false;
-        taskLocalStorage[1] = classItem;
-        clearCompleted.style.display = "none";
-      };
-      localStorage["taskId_" + taskItem.getAttribute('data-item')] = JSON.stringify(taskLocalStorage);
-    };
-    countLeftNumber();
-  };
-
-  deleteCompletedTasks() {
-    const taskItems = taskList.querySelectorAll('li');
-    taskItems.forEach(item => {
-      if (item.classList.contains('completed')) {
-        localStorage.removeItem("taskId_" + item.getAttribute('data-item'));
-        item.parentNode.removeChild(item);
-      };
+        task.uncompleted();
+      }
+      task.reRecord();
     });
-
-    if (!taskList.hasChildNodes()) {
-      blockToggleAll.style.display = "none";
-      blockFooter.style.display = "none";
-    };
-    countLeftNumber();
-    clearCompleted.style.display = "none";
+    this.countLeftNumber();
+    this.showClearCompleted();
   }
 
-  filterAllTasks() {
-    const taskItems = taskList.querySelectorAll('li');
-    taskItems.forEach(item => {
-      item.style.display = "block";
+  showAllTasks() {
+    this.getList().forEach((task) => {
+      task.show();
+      task.reRecord();
     });
     filterActive.classList.remove('selected');
     filterAll.classList.add('selected');
     filterCompleted.classList.remove('selected');
   }
 
-  filterActiveTasks() {
-    const taskItems = taskList.querySelectorAll('li');
-    taskItems.forEach(item => {
-      item.style.display = "block";
-      if (item.classList.contains('completed')) {
-        item.style.display = "none";
-      };
+  showAllCompletedTasks() {
+    this.getList().forEach((task) => {
+      if (task.isComplete) {
+        task.show();
+      } else {
+        task.hide();
+      }
+      task.reRecord();
+    });
+    filterActive.classList.remove('selected');
+    filterAll.classList.remove('selected');
+    filterCompleted.classList.add('selected');
+  }
+
+  showAllActiveTasks() {
+    this.getList().forEach((task) => {
+      if (task.isComplete) {
+        task.hide();
+      } else {
+        task.show();
+      }
+      task.reRecord();
     });
     filterActive.classList.add('selected');
     filterAll.classList.remove('selected');
     filterCompleted.classList.remove('selected');
   }
 
-  filterCompletedTasks() {
-    const taskItems = taskList.querySelectorAll('li');
-    taskItems.forEach(item => {
-      item.style.display = "block";
-      if (!item.classList.contains('completed')) {
-        item.style.display = "none";
-      };
+  deleteTask(task) {
+    delete this.list[task.id];
+    task.delete();
+    task.removeRecord();
+    this.countLeftNumber();
+    this.showClearCompleted();
+    this.showFooter();
+  }
+
+  deleteCompletedTasks() {
+    this.getList().forEach((task) => {
+      if (task.isComplete) {
+        delete this.list[task.id];
+        task.delete();
+        task.removeRecord();
+      }
     });
-    filterActive.classList.remove('selected');
-    filterAll.classList.remove('selected');
-    filterCompleted.classList.add('selected');
-  }
-}
-
-class Task {
-
-  constructor(task, id) {
-    this.task = task;
-    this.id = id;
+    this.countLeftNumber();
+    this.showClearCompleted();
+    this.showFooter();
   }
 
-  createNewElement(task, id) {
-    const taskItem = document.createElement('li');
-    taskItem.setAttribute('data-item', id);
-    const toggleOne = document.createElement('input');
-    toggleOne.type = 'checkbox';
-    toggleOne.className = 'toggle-one';
-    const labelToggleOne = document.createElement('label');
-    labelToggleOne.setAttribute('for', 'toggle-one');
-    const label = document.createElement('label');
-    label.className = 'label-text';
-    label.innerText = task;
-    const input = document.createElement('input');
-    input.type = 'text';
-    const buttonDelete = document.createElement('button');
-    buttonDelete.type = 'button';
-    buttonDelete.className = 'delete';
-
-    taskItem.appendChild(toggleOne);
-    taskItem.appendChild(labelToggleOne);
-    taskItem.appendChild(label);
-    taskItem.appendChild(input);
-    taskItem.appendChild(buttonDelete);
-
-    return taskItem;
+  editTask(task) {
+    task.edit();
   }
 
-}
+  editCompleteTask(task) {
+    if (!task.input.value) {
+      delete this.list[task.id];
+      task.delete();
+      task.removeRecord();
+      this.countLeftNumber();
+      this.showClearCompleted();
+      this.showFooter();
+    } else {
+      task.editComplete();
+      task.reRecord();
+    }
+  }
 
-const todoList = new TodoList;
-
-todoList.getValueAfterReload();
-
-inputTask.addEventListener('keyup', function (e) {
-  if (e.keyCode === keyEnter) {
-    event.preventDefault();
-    const taskItems = taskList.querySelectorAll('li');
-    taskItems.forEach(item => {
-      let maxId = item.getAttribute('data-item');
-      if (maxId > newId) {
-        newId = maxId;
-      };
+  showClearCompleted() {
+    let countNotCompleted = 0;
+    this.getList().forEach((task) => {
+      if (!task.isComplete) {
+        countNotCompleted++;
+      }
     });
-    newId++;
-    todoList.addTask();
-    // счётчик
-    countLeftNumber();
-    if (taskItems.length === 1) {
-      toggleAll.checked = false;
+    if (countNotCompleted === Object.keys(this.list).length) {
+      clearCompleted.style.display = "none";
+    } else {
+      clearCompleted.style.display = "block";
     };
-  };
+  }
+
+  countLeftNumber() {
+    let count = 0;
+    this.getList().forEach((task) => {
+      if (!task.isComplete) {
+        count++;
+      }
+    });
+    countLeft.innerHTML = count;
+  }
+
+  getValueAfterReload() {
+    if (localStorage.length > 0) {
+      for (let i = 0; i < localStorage.length; i++) {
+        const id = localStorage.key(i);
+        const taskObject = JSON.parse(localStorage.getItem(id));
+        const title = taskObject['title'];
+        const isComplete = JSON.parse(taskObject['isComplete']);
+        const task = new Task(id, title);
+        this.addTask(task);
+        if (isComplete) {
+          task.completed();
+        } else {
+          task.uncompleted();
+        }
+      }
+      this.countLeftNumber();
+      this.showClearCompleted();
+      this.showFooter();
+    }
+  }
+
+}
+
+// Инициализация списка
+const todoList = new Todolist();
+
+// подписка на инпут ввода тасков
+inputTask.addEventListener("keyup", function (e) {
+  if (e.keyCode === keyEnter) {
+    const id = new Date().getTime();
+    const title = e.target.value;
+    const task = new Task(id, title);
+
+    todoList.addTask(task);
+    todoList.recordTask(task);
+    e.target.value = "";
+  }
 });
-
-toggleAll.onclick = todoList.toggleAllTasks;
-
-clearCompleted.onclick = todoList.deleteCompletedTasks;
-
-filterAll.onclick = todoList.filterAllTasks;
-
-filterActive.onclick = todoList.filterActiveTasks;
-
-filterCompleted.onclick = todoList.filterCompletedTasks;
