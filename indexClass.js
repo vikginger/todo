@@ -169,6 +169,7 @@ class Todolist {
     task.onTaskEditComplete = this.editCompleteTask;
     this.showFooter();
     this.countLeftNumber();
+
   }
 
   recordTask(task) {
@@ -330,12 +331,17 @@ const todoList = new Todolist();
 // подписка на инпут ввода тасков
 inputTask.addEventListener("keyup", function (e) {
   if (e.keyCode === keyEnter) {
+
     const id = new Date().getTime();
     const title = e.target.value;
-    const task = new Task(id, title);
+    if (!e.target.value) {
+      return null
+    } else {
+      const task = new Task(id, title);
 
-    todoList.addTask(task);
-    todoList.recordTask(task);
-    e.target.value = "";
+      todoList.addTask(task);
+      todoList.recordTask(task);
+      e.target.value = "";
+    }
   }
 });
