@@ -102,11 +102,19 @@ class Task {
   }
 
   record() {
-    localStorage.setItem(this.id, JSON.stringify(this));
+    let recordItem = {};
+    recordItem['id'] = this.id;
+    recordItem['title'] = this.title;
+    recordItem['isComplete'] = this.isComplete;
+    localStorage.setItem(this.id, JSON.stringify(recordItem));
   }
 
   reRecord() {
-    localStorage[this.id] = JSON.stringify(this);
+    let recordItem = {};
+    recordItem['id'] = this.id;
+    recordItem['title'] = this.title;
+    recordItem['isComplete'] = this.isComplete;
+    localStorage[this.id] = JSON.stringify(recordItem);
   }
 
   removeRecord() {
@@ -308,7 +316,7 @@ class Todolist {
         const id = localStorage.key(i);
         const taskObject = JSON.parse(localStorage.getItem(id));
         const title = taskObject['title'];
-        const isComplete = JSON.parse(taskObject['isComplete']);
+        const isComplete = taskObject['isComplete'];
         const task = new Task(id, title);
         this.addTask(task);
         if (isComplete) {
